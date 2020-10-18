@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+	<title>Home</title>
+
+</head>
+
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/1.4.8/socket.io.min.js"></script>
+
+<style type="text/css">
+
+	#question_form{
+
+		position: absolute;
+
+		margin-left: 700px;
+
+		width: 520px;
+
+		border-style: solid;
+
+		border-color: #F4A261;
+
+		color: #2A9D8F;
+
+		background-color: #264653;
+
+	}
+
+	#results_format{
+
+		position: absolute;
+
+		color: #2A9D8F;
+
+		background-color: #264653;
+
+		width: 520px;
+
+		border-style: solid;
+
+		border-color: #F4A261;
+
+		margin-left: 700px;
+
+		margin-top: 180px;
+
+	}
+
+</style>
+
+<body style="background-color: #535353">
+
+	<div id = "question_form">
+
+		<p style="margin-left: 10px;">Please enter your datapoints below. (Separate points with commas or spaces)</p>
+		
+		<input style="margin-left: 10px; width: 490px;" type="text" id="datapoints">
+
+		<br>
+
+		<p style = "position: absolute; margin-left: 10px; margin-top: 12px;">Z-Value</p>
+
+		<p style = "position: absolute; margin-left: 5px; margin-top: 40px;">Percentile</p>
+
+		<input style="position: absolute; margin-top: 10px; margin-left: 70px; width: 430px;" type="text" id="Z-TO-CALC">
+
+		<input style="position: absolute; margin-top: 40px; margin-left: 70px; width: 430px;" type="text" id="PERCENTILE_TO_CALC">
+
+		<button onclick = "submit_form()" style="margin-left: 10px; margin-top: 70px; margin-bottom: 10px;">Evaluate</button>
+
+	</div>
+
+	<div id = "results_format">
+		
+		<table>
+			
+			<tr>
+				
+				<th style="position: relative; border-bottom: 1px solid red; width: 520px;">
+					
+					Results
+
+				</th>
+
+			</tr>
+
+			<tr>
+				
+				<th style="position: relative; border-bottom: 1px solid red; width: 520px;">
+					
+					<p id = "LENGTH">Length: </p>
+
+				</th>
+
+			</tr>
+
+			<tr>
+				
+				<th style="position: relative; border-bottom: 1px solid red; width: 520px;">
+					
+					<p id = "Q1">First Quartile: </p>
+
+				</th>
+
+			</tr>
+
+			<tr>
+				
+				<th style="position: relative; border-bottom: 1px solid red; width: 520px;">
+					
+					<p id = "Q3">Third Quartile: </p>
+
+				</th>
+
+			</tr>
+
+			<tr>
+				
+				<th style="position: relative; border-bottom: 1px solid red; width: 520px;">
+					
+					<p id = "IQR">Interquartile Range: </p>
+
+				</th>
+
+			</tr>
+
+			<tr>
+				
+				<th style="position: relative; border-bottom: 1px solid red; width: 520px;">
+					
+					<p id="RANGE">Range: </p> 
+
+				</th>
+
+			</tr>
+
+			<tr>
+				
+				<th style="position: relative; border-bottom: 1px solid red; width: 520px;">
+					
+					<p id="MEDIAN">Median: </p>
+
+				</th>
+
+			</tr>
+
+
+			<tr>
+				
+				<th style="position: relative; border-bottom: 1px solid red; width: 520px;">
+					
+					<p id = "MEAN">Mean: </p>
+
+				</th>
+
+			</tr>
+
+			<tr>
+				
+				<th style="position: relative; border-bottom: 1px solid red; width: 520px;">
+					
+					<p id="MODE">Mode: </p>
+
+				</th>
+
+			</tr>
+
+			
+
+			<tr>
+				
+				<th style="position: relative; border-bottom: 1px solid red; width: 520px;">
+					
+					<p id="STDDEV">Standard Deviation: </p>
+
+				</th>
+
+			</tr>
+
+			<tr>
+				
+				<th style="position: relative; border-bottom: 1px solid red; width: 520px;">
+					
+					<p id="Z-VAL">Z-Value: </p>
+
+				</th>
+
+			</tr>
+
+			<tr>
+				
+				<th style="position: relative; border-bottom: 1px solid red; width: 520px;">
+					
+					<p id="PERCENTILE">Percentile: </p>
+
+				</th>
+
+			</tr>
+
+		</table>
+
+	</div>
+
+</body>
+
+<script type="text/javascript">
+
+	var socket = io.connect('http://127.0.0.1:5000');
+	
+	function submit_form(){
+
+		var Data_Points = document.getElementById('datapoints').value;
+
+		var Z_TO_CALC = document.getElementById('Z-TO-CALC').value;
+
+		var PERCENTILE_TO_CALC = document.getElementById('PERCENTILE_TO_CALC').value;
+
+		socket.emit('calculate_data', {'data': Data_Points, 'Z_TO_CALC': Z_TO_CALC, 'PERCENTILE_TO_CALC': PERCENTILE_TO_CALC});
+
+	}
+
+	socket.on('yield_data', function(data){
+
+		console.log(data);
+
+		document.getElementById('MEAN').innerHTML = "Mean: " + String(data['MEAN']);
+
+		document.getElementById('MEDIAN').innerHTML = "Median: " + String(data['MEDIAN']);
+
+		document.getElementById('MODE').innerHTML = "Mode: " + String(data['MODE']);
+
+		document.getElementById('RANGE').innerHTML = "Range: " + String(data['RANGE']);
+
+		document.getElementById('STDDEV').innerHTML = "Standard Deviation: " + String(data['STDDEV']);
+
+		document.getElementById('LENGTH').innerHTML = "Length: " + String(data['LENGTH']);
+
+		document.getElementById('Q1').innerHTML = "First Quartile: " + String(data['Q1']);
+
+		document.getElementById('Q3').innerHTML = "Third Quartile: " + String(data['Q3']);
+
+		document.getElementById('IQR').innerHTML = "Interquartile Range: " + String(data['IQR']);
+
+		document.getElementById('Z-VAL').innerHTML = "Z-Value: " + String(data['Z-VAL']);
+
+		document.getElementById('PERCENTILE').innerHTML = "PERCENTILE: " + String(data['PERCENTILE']);
+
+
+	});
+
+</script>
+
+</html>
